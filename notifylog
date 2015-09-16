@@ -17,6 +17,10 @@ import gobject
 
 class NotificationLog(dbus.service.Object):
 
+    def __init__(self, *args, **kwargs):
+        self.fake_id = 0
+        super(NotificationLog, self).__init__(*args, **kwargs)
+
     @staticmethod
     def colour(foreground):
         return '\x1b[38;5;%dm' % foreground
@@ -27,18 +31,13 @@ class NotificationLog(dbus.service.Object):
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='susssasa{ss}i', out_signature='u')
     def Notify(self, app_name, notification_id, app_icon, summary, body, actions, hints, expire_timeout):
+        if notification_id is None:
+            self.fake_id += 1
+            notification_id = self.fake_id
+
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
         app_colour = self.character_sum(app_name) % 14 + 1
-        print("%s%s%s %s%s%s %s %s %s" % (
-            self.colour(7),
-            timestamp,
-            self.colour(15),
-            self.colour(app_colour),
-            app_name,
-            self.colour(15),
-            summary,
-            body,
-        ))
+        print("%s%s%s %s%s%s %s %s" % (self.colour(7), timestamp, self.colour(15), self.colour(app_colour), app_name, self.colour(15), summary, body))
         return notification_id
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
@@ -55,7 +54,7 @@ class NotificationLog(dbus.service.Object):
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='ssss')
     def GetServerInformation(self):
-      return ("notifylog", "https://github.com/fincham/notifylog", "dev", "1")
+      return ("notifylog", "", "0", "1")
 
 if __name__ == '__main__':
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
