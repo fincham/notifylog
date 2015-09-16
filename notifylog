@@ -64,6 +64,6 @@ if __name__ == '__main__':
     nf = NotificationLog(session_bus, '/org/freedesktop/Notifications')
     context = gobject.MainLoop().get_context()
 
-    while true:
+    while True:
         context.iteration(True)
 
