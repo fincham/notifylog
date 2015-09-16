@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+
+"""
+Log all Notification messages sent on dbus in an aesthetically pleasing way.
+
+Michael Fincham <michael.fincham@hotplate.co.nz>
+"""
+
+from __future__ import print_function
+
+import time
+
+import dbus
+import dbus.mainloop.glib
+import dbus.service
+import gobject
+
+class NotificationLog(dbus.service.Object):
+
+    @staticmethod
+    def colour(foreground):
+        return '\x1b[38;5;%dm' % foreground
+
+    @staticmethod
+    def character_sum(string):
+        return sum([ord(c) for c in string])
+
+    @dbus.service.method("org.freedesktop.Notifications", in_signature='susssasa{ss}i', out_signature='u')
+    def Notify(self, app_name, notification_id, app_icon, summary, body, actions, hints, expire_timeout):
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+        app_colour = self.character_sum(app_name) % 14 + 1
+        print("%s%s%s %s%s%s %s %s %s" % (
+            self.colour(7),
+            timestamp,
+            self.colour(15),
+            self.colour(app_colour),
+            app_name,
+            self.colour(15),
+            summary,
+            body,
+        ))
+        return notification_id
+
+    @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
+    def GetCapabilities(self):
+        return ("body")
+
+    @dbus.service.signal('org.freedesktop.Notifications', signature='uu')
+    def NotificationClosed(self, id_in, reason_in):
+        pass
+
+    @dbus.service.method("org.freedesktop.Notifications", in_signature='u', out_signature='')
+    def CloseNotification(self, id):
+        pass
+
+    @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='ssss')
+    def GetServerInformation(self):
+      return ("notifylog", "https://github.com/fincham/notifylog", "dev", "1")
+
+if __name__ == '__main__':
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    session_bus = dbus.SessionBus()
+    name = dbus.service.BusName("org.freedesktop.Notifications", session_bus)
+    nf = NotificationLog(session_bus, '/org/freedesktop/Notifications')
+    context = gobject.MainLoop().get_context()
+
+    while 1:
+        context.iteration(True)
+
