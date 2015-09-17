@@ -33,20 +33,21 @@ class NotificationLog(dbus.service.Object):
     @dbus.service.method("org.freedesktop.Notifications", in_signature='susssasa{ss}i', out_signature='u')
     def Notify(self, app_name, notification_id, app_icon, summary, body, actions, hints, expire_timeout):
         if self.date != time.strftime('%Y-%m-%d'):
-            print(time.strftime('%Y-%m-%d'), end=" ")
+            timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
             self.date = time.strftime('%Y-%m-%d')
+        else:
+            timestamp = time.strftime('%H:%M:%S')
 
         if notification_id is None:
             self.fake_id += 1
             notification_id = self.fake_id
 
-        timestamp = time.strftime('%H:%M:%S')
         app_colour = self.character_sum(app_name) % 14 + 1
         if app_colour == 7 or app_colour == 15:
             app_colour = app_colour - 1
-            
-        print("%s%s %s%s%s %s" % (self.colour(7), timestamp, self.colour(app_colour), summary, self.colour(15), body))
 
+        print("%s%s %s%s%s" % (self.colour(7), timestamp, self.colour(app_colour), summary, self.colour(15)))
+        print(body.rjust(len(timestamp) + len(body) + 1))
         return notification_id
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
