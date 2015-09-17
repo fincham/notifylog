@@ -47,7 +47,8 @@ class NotificationLog(dbus.service.Object):
             app_colour = app_colour - 1
 
         print("%s%s %s%s%s" % (self.colour(7), timestamp, self.colour(app_colour), summary, self.colour(15)))
-        print(body.rjust(len(timestamp) + len(body) + 1))
+        if len(strip(bodu)):
+            print(body.rjust(len(timestamp) + len(body) + 1))
         return notification_id
 
     @dbus.service.method("org.freedesktop.Notifications", in_signature='', out_signature='as')
