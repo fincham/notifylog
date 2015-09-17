@@ -47,7 +47,7 @@ class NotificationLog(dbus.service.Object):
             app_colour = app_colour - 1
 
         print("%s%s %s%s%s" % (self.colour(7), timestamp, self.colour(app_colour), summary, self.colour(15)))
-        if len(strip(bodu)):
+        if len(body.strip()):
             print(body.rjust(len(timestamp) + len(body) + 1))
         return notification_id
 
