@@ -42,7 +42,11 @@ class NotificationLog(dbus.service.Object):
             self.fake_id += 1
             notification_id = self.fake_id
 
-        app_colour = self.character_sum(app_name) % 14 + 1
+        if 'irssi' not in app_name:
+            app_colour = self.character_sum(app_name) % 14 + 1
+        else:
+            app_colour = self.character_sum(summary) % 14 + 1
+
         if app_colour == 7 or app_colour == 15:
             app_colour = app_colour - 1
 
